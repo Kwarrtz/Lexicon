@@ -1,0 +1,17 @@
+{
+    "name": "Lexicon",
+    "version": "0.0.0",
+    "author": [
+        "Dathan Ault-McCoy"
+    ],	
+    "AutoloadNamespaces": {
+		"MediaWiki\\Extension\\Lexicon\\": "src/"
+	},
+	"SpecialPages": {
+		"Lexicon": "MediaWiki\\Extension\\Lexicon\\Special"
+    },
+    "config": {
+        "LexiconCategory": "Lexicon"
+    },
+    "manifest_version": 2
+}
