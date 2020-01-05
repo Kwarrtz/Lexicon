@@ -8,31 +8,38 @@ class SpecialLexicon extends SpecialPage {
         $output = $this->getOutput();
         $dbr = wfGetDB(DB_REPLICA);
 
-        $pages = $dbr->select(
-            "categorylinks",
-            array("cl_from"),
-            "cl_to = " . $wgLexiconCategory,
-            __METHOD__
-        );
-
-        $cond = "page_id = " . array_pop($pages);
-        foreach ($pages as $row) {
-            $cond .= " OR " . $row->page_id;
-        }
-
         foreach (range('A', 'Z') as $letter) {
-            $titles = $dbr->select(
-                "page",
+            $entries = $dbr->select(
+                array("page", "categorylinks"),
                 array("page_title"),
-                "page_title LIKE " . $letter . "% AND (" . $cond . ")",
+                array(
+                    "page_title LIKE '" . $letter . "%'",
+                    "cl_to" => $wgLexiconCategory
+                ),
                 __METHOD__,
-                array("ORDER BY" => "page_title ASC")
+                array(),
+                array("categorylinks" => array("INNER_JOIN", array("page_id=cl_from")))
             );
+
+            $phantoms = $dbr->select(
+                array("pagelinks", "page"),
+                array("pl_title"),
+                array(
+                    "pl_title LIKE '" . $letter . "%'",
+                    "page_id IS NULL"
+                ),
+                __METHOD__,
+                array(),
+                array("page" => array("LEFT_JOIN", array("pl_from=page_id")))
+            );
+
+            $titles = array_merge($entries, $phantoms);
 
             $output->addWikiText("=" . $letter . "=\n");
 
             foreach ($titles as $title) {
                 $output->addWikiText("* [[" . $title . "]]\n");
             }
+        }
     }
 }
