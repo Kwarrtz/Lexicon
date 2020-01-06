@@ -11,7 +11,10 @@
 		"Lexicon": "MediaWiki\\Extension\\Lexicon\\Special"
     },
     "config": {
-        "LexiconCategory": "Lexicon"
+        "LexiconCategory": {
+            "value": "Loma_Roja",
+            "description": "Category to pull entries from (without prefix and spaces replaced with underscores)"
+        }
     },
     "manifest_version": 2
 }

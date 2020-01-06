@@ -7,6 +7,7 @@ class SpecialLexicon extends SpecialPage {
     function execute($par) {
         $output = $this->getOutput();
         $dbr = wfGetDB(DB_REPLICA);
+        $this->setHeaders();
 
         foreach (range('A', 'Z') as $letter) {
             $entries = $dbr->select(
