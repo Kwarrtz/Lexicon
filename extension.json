@@ -3,18 +3,12 @@
     "version": "0.0.0",
     "author": [
         "Dathan Ault-McCoy"
-    ],	
-    "AutoloadNamespaces": {
-		"MediaWiki\\Extension\\Lexicon\\": "src/"
-	},
-	"SpecialPages": {
-		"Lexicon": "MediaWiki\\Extension\\Lexicon\\Special"
+    ],  
+    "AutoloadClasses": {
+        "SpecialLexicon": "src/Special.php"
     },
-    "config": {
-        "LexiconCategory": {
-            "value": "Loma_Roja",
-            "description": "Category to pull entries from (without prefix and spaces replaced with underscores)"
-        }
+    "SpecialPages": {
+        "Lexicon": "SpecialLexicon"
     },
     "manifest_version": 2
 }

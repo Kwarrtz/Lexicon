@@ -1,13 +1,13 @@
 <?php
 class SpecialLexicon extends SpecialPage {
     function __construct() {
-        parent::__construct("LexiconEntriesAndPhantoms");
+        parent::__construct("Lexicon");
     }
 
     function execute($par) {
+        $this->setHeaders();
         $output = $this->getOutput();
         $dbr = wfGetDB(DB_REPLICA);
-        $this->setHeaders();
 
         foreach (range('A', 'Z') as $letter) {
             $entries = $dbr->select(
@@ -15,11 +15,11 @@ class SpecialLexicon extends SpecialPage {
                 array("page_title"),
                 array(
                     "page_title LIKE '" . $letter . "%'",
-                    "cl_to" => $wgLexiconCategory
+                    "cl_to" => "Loma_Roja"
                 ),
                 __METHOD__,
                 array(),
-                array("categorylinks" => array("INNER_JOIN", array("page_id=cl_from")))
+                array("categorylinks" => array("INNER JOIN", array("page_id=cl_from")))
             );
 
             $phantoms = $dbr->select(
@@ -27,19 +27,21 @@ class SpecialLexicon extends SpecialPage {
                 array("pl_title"),
                 array(
                     "pl_title LIKE '" . $letter . "%'",
-                    "page_id IS NULL"
+                    "page_namespace IS NULL"
                 ),
                 __METHOD__,
                 array(),
-                array("page" => array("LEFT_JOIN", array("pl_from=page_id")))
+                array("page" => array("LEFT JOIN", array("page_namespace=pl_namespace", "page_title=pl_title")))
             );
 
-            $titles = array_merge($entries, $phantoms);
+            $output->addWikiTextAsContent("=" . $letter . "=\n");
 
-            $output->addWikiText("=" . $letter . "=\n");
+            for ($i = 1; $i <= $entries->numRows(); $i++) {
+                $output->addWikiTextAsContent("* [[" . $entries->fetchRow()["page_title"] . "]]\n");
+            }
 
-            foreach ($titles as $title) {
-                $output->addWikiText("* [[" . $title . "]]\n");
+            for ($i = 1; $i <= $phantoms->numRows(); $i++) {
+                $output->addWikiTextAsContent("* [[" . $phantoms->fetchRow()["pl_title"] . "]]\n");
             }
         }
     }
