@@ -10,5 +10,8 @@
     "SpecialPages": {
         "Lexicon": "SpecialLexicon"
     },
+    "MessagesDirs": {
+        "Lexicon": ["i18n"]
+    },
     "manifest_version": 2
 }

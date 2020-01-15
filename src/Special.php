@@ -1,48 +1,70 @@
 <?php
+$gLexiconCategory = "Loma_Roja";
+
 class SpecialLexicon extends SpecialPage {
     function __construct() {
-        parent::__construct("Lexicon");
+        parent::__construct("lexicon");
     }
 
     function execute($par) {
+        global $gLexiconCategory;
+
         $this->setHeaders();
         $output = $this->getOutput();
         $dbr = wfGetDB(DB_REPLICA);
 
         foreach (range('A', 'Z') as $letter) {
             $entries = $dbr->select(
-                array("page", "categorylinks"),
-                array("page_title"),
-                array(
+                ["page", "categorylinks"],
+                ["page_title"],
+                [
                     "page_title LIKE '" . $letter . "%'",
                     "cl_to" => "Loma_Roja"
-                ),
+                ],
                 __METHOD__,
-                array(),
-                array("categorylinks" => array("INNER JOIN", array("page_id=cl_from")))
+                [],
+                ["categorylinks" => ["INNER JOIN", ["page_id = cl_from"]]]
             );
 
-            $phantoms = $dbr->select(
-                array("pagelinks", "page"),
-                array("pl_title"),
-                array(
+            $phantomRefs = $dbr->select(
+                ["pagelinks", "pg_to" => "page", "pg_from_nest" => ["pg_from" => "page", "categorylinks"]],
+                ["to" => "pl_title", "from" => "pg_from.page_title"],
+                [
                     "pl_title LIKE '" . $letter . "%'",
-                    "page_namespace IS NULL"
-                ),
+                    "pg_to.page_namespace IS NULL",
+                    "cl_to" => "Loma_Roja"
+                ],
                 __METHOD__,
-                array(),
-                array("page" => array("LEFT JOIN", array("page_namespace=pl_namespace", "page_title=pl_title")))
+                [],
+                [
+                    "pg_to" => ["LEFT JOIN", ["pg_to.page_namespace = pl_namespace", "pg_to.page_title = pl_title"]],
+                    "pg_from_nest" => ["LEFT JOIN", "pg_from.page_id = pl_from"],
+                    "categorylinks" => ["INNER JOIN", "cl_from = pg_from.page_id"]
+                ]
             );
 
-            $output->addWikiTextAsContent("=" . $letter . "=\n");
+            $phantoms = [];
+
+            for ($i = 1; $i <= $phantomRefs->numRows(); $i++) {
+                $row = $phantomRefs->fetchObject();
+                $phantoms[$row->to][] = $row->from;
+            }
+
+            $linkify = function($title) { return "[[" . str_replace('_', ' ', $title) . "]]"; };
+
+            $output->addWikiTextAsContent("=" . $letter . "=");
 
             for ($i = 1; $i <= $entries->numRows(); $i++) {
-                $output->addWikiTextAsContent("* [[" . $entries->fetchRow()["page_title"] . "]]\n");
+                $output->addWikiTextAsContent("*" . $linkify($entries->fetchObject()->page_title));
             }
 
-            for ($i = 1; $i <= $phantoms->numRows(); $i++) {
-                $output->addWikiTextAsContent("* [[" . $phantoms->fetchRow()["pl_title"] . "]]\n");
+            foreach ($phantoms as $phantom => $refs) {
+                $output->addWikiTextAsContent("* [[" . $phantom . "]] (" . join(", ", array_map($linkify, $refs)) . ")");
             }
         }
+    }
+
+    function getGroupName() {
+        return "pages";
     }
 }
