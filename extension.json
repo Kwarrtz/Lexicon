@@ -1,9 +1,12 @@
 {
     "name": "Lexicon",
-    "version": "0.0.0",
+    "version": "0.1.0",
     "author": [
         "Dathan Ault-McCoy"
-    ],  
+    ],
+    "description-msg": "lexicon-desc",
+    "type": "specialpage",
+    "license-name": "MIT",
     "AutoloadClasses": {
         "SpecialLexicon": "src/Special.php"
     },
@@ -12,6 +15,16 @@
     },
     "MessagesDirs": {
         "Lexicon": ["i18n"]
+    },
+    "ExtensionMessageFiles" : {
+        "LexiconAlias": "Lexicon.i18n.alias.php"
+    },
+    "config": {
+        "LexiconEntryCategory": {
+            "value": "Lexicon",
+            "description": "The category in which entries in the game are contained",
+            "public": true
+        }
     },
     "manifest_version": 2
 }

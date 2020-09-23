@@ -1,5 +1,4 @@
 <?php
-$gLexiconCategory = "Loma_Roja";
 
 class SpecialLexicon extends SpecialPage {
     function __construct() {
@@ -7,7 +6,7 @@ class SpecialLexicon extends SpecialPage {
     }
 
     function execute($par) {
-        global $gLexiconCategory;
+        $catName = $this->getConfig()->get("LexiconEntryCategory");
 
         $this->setHeaders();
         $output = $this->getOutput();
@@ -19,7 +18,7 @@ class SpecialLexicon extends SpecialPage {
                 ["page_title"],
                 [
                     "page_title LIKE '" . $letter . "%'",
-                    "cl_to" => "Loma_Roja"
+                    "cl_to" => $catName
                 ],
                 __METHOD__,
                 [],
@@ -32,7 +31,7 @@ class SpecialLexicon extends SpecialPage {
                 [
                     "pl_title LIKE '" . $letter . "%'",
                     "pg_to.page_namespace IS NULL",
-                    "cl_to" => "Loma_Roja"
+                    "cl_to" => $catName
                 ],
                 __METHOD__,
                 [],
@@ -59,7 +58,7 @@ class SpecialLexicon extends SpecialPage {
             }
 
             foreach ($phantoms as $phantom => $refs) {
-                $output->addWikiTextAsContent("* [[" . $phantom . "]] (" . join(", ", array_map($linkify, $refs)) . ")");
+                $output->addWikiTextAsContent("*" . $linkify($phantom) . " (" . join(", ", array_map($linkify, $refs)) . ")");
             }
         }
     }
